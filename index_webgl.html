@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>My webgl blogs</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<script src="js/three.min.js" type="text/javascript" charset="utf-8"></script>
+
+	</head>
+	<style type="text/css">
+		*{
+			margin: 0px;
+			padding: 0px;
+		}
+		canvas{
+			position: absolute;
+		}
+	</style>
+	<body>
+
+	</body>
+	<script type="text/javascript">
+		var camera, scene, renderer;
+		var geometry, material, mesh;
+
+		init();
+		animate();
+
+		function init() {
+
+			camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10);
+			camera.position.z = 1;
+
+			scene = new THREE.Scene();
+
+			geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+			material = new THREE.MeshNormalMaterial();
+
+			mesh = new THREE.Mesh(geometry, material);
+			scene.add(mesh);
+
+			renderer = new THREE.WebGLRenderer({
+				antialias: true
+			});
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+		}
+
+		function animate() {
+
+			requestAnimationFrame(animate);
+
+			mesh.rotation.x += 0.01;
+			mesh.rotation.y += 0.02;
+
+			renderer.render(scene, camera);
+
+		}
+	</script>
+
+</html>

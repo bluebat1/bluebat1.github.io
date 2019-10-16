@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>血之誓言的博客</title>
+	</head>
+	<style type="text/css">
+		/*灰色是主色*/
+		*{
+			margin: 0px;
+			padding: 0px;
+		}
+		body{
+			background: rgba(68,68,68,0.1);
+		}
+		#main{
+			position: absolute;
+			height: 95%;
+			width: 95%;
+			left: 2.5%;
+			top: 2.5%;
+		}
+		#top{
+			background: rgba(0,188,188,0.8);
+			position: absolute;
+			width: 100%;
+			height: 5em;
+		}
+		/*左侧内容块*/
+		#left{
+			position: absolute;
+			top: 5em;
+			width: 30%;
+			height: 100%;
+			min-height: 100%;
+			background: rgba(200,200,200,0.8);
+		}
+		#right{
+			position: absolute;
+			background: #FFE4C4;
+			width: 70%;
+			height: auto;
+			min-height: 100%;
+			top: 5em;
+			right: 0px;
+		}
+		#list{
+			padding-left: 1em;
+		}
+		#list ul{
+			list-style: none;
+		}
+		#list ul li{
+			
+		}
+		.border {
+			background: rgba(1,122,12,0.5);
+		}
+		.border_top{
+			position: fixed;
+			top: 0px;
+			width: 100%;
+			height: 5vh;
+			background: url(img/border-2-x.jpg) #d9c9ba;
+			background-size: auto 100%;
+		}
+		.border_left{
+			position: fixed;
+			width: 5vh;
+			height: 100%;
+			background: url(img/border-2-y.jpg) #d9c9ba;
+			background-size: 100% auto;
+		}
+		.border_right{
+			position: fixed;
+			right: 0px;
+			width: 5vh;
+			height: 100%;
+			background: url(img/border-2-y.jpg) #d9c9ba;
+			background-size: 100% auto;
+		}
+		.border_bottom{
+			position: fixed;
+			bottom: 0px;
+			width: 100%;
+			height: 5vh;
+			background: url(img/border-2-x.jpg) #d9c9ba;
+			background-size: auto 100%;
+		}
+		.border_img{
+			position: fixed;
+			top: 5vh;
+			left: calc(50vw - 20vh);
+			width: 40vh;
+			height: 15vh;
+			background: url(img/border_1_t.png) ;
+			background-size: 100% 100%;
+		}
+		
+		
+	</style>
+	<body>
+		<div id="main">
+			<div id="top">
+			</div>
+			
+			<div id="left">
+				<div id="list">
+					<ul>
+						<li>
+							<h3>草堂筆記</h3>
+							<ul>
+								<li>babylonjs高度地圖創建及LOD</li>
+							</ul>
+						</li>
+						<li>
+							<h3>源源不斷</h3>
+						</li>
+						<li>
+							<h3>奇思妙想</h3>
+						</li>
+						<li>
+							<h3>難解難分</h3>
+						</li>
+						<li>
+							<h3>熱鬧非凡</h3>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div id="right">
+				
+			</div>
+		</div>
+		<img src="img/1.gif" style="height: 20%;bottom: 10vh;left: 5%;position: fixed;"/>
+		<div id="top_float">
+			<ul>
+				<li><a href="#">首页</a></li><br>
+				<li><a href="#">论坛</a></li><br>
+				<li><a href="#">技术</a></li><br>
+				<li><a href="#">展示</a></li><br>
+				<li><a href="#">回頂</a></li><br>
+			</ul>
+		</div>
+		<div class="border">
+			<div class="border_left"></div>
+			<div class="border_right"></div>
+			<div class="border_top"></div>
+			<div class="border_bottom"></div>
+			<div class="border_img"></div>
+		</div>
+		<script src="js/float_module.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/main.js" type="text/javascript" charset="utf-8"></script>
+	</body>
+</html>

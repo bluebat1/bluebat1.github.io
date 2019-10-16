@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>PWM参数设置工具</title>
+	</head>
+	<style type="text/css">
+		*{
+			margin: 0px;
+			padding: 0px;
+		}
+		#main{
+			width: 100vw;
+			height: 100vh;
+			position: absolute;
+			background: url(img/timg3.jpg);
+			background-size: 100% 100%;
+			overflow: auto;
+		}
+		#title{
+			position: absolute;
+			background: darkturquoise;
+			border-radius: 1vw;
+			padding: 10px;
+			width: 94vw;
+			left: 2vw;
+			top: 1vh;
+		}
+		#ul_a {
+			list-style: none;
+			position: absolute;
+			top: 20vh;
+			left: 5vw;
+		}
+		#ul_a li{
+			margin-top: 5vh;
+		}
+		#ul_a li div{
+			background: bisque;
+			padding: 10px;
+			border-radius: 10px;
+			border: solid saddlebrown;
+		}
+		#zkb{
+			background: bisque;
+			padding: 10px;
+			border-radius: 10px;
+			border: solid saddlebrown;
+			position: absolute;
+			top: 80vh;
+			left: 5vw;
+		}
+		#ul_b{
+			list-style: none;
+			position: absolute;
+			top: 20vh;
+			left: 30vw;
+		}
+		#ul_b li{
+			margin-top: 5vh;
+		}
+		#ul_b li input{
+			background: cornsilk;
+			border: solid saddlebrown;
+			border-radius: 10px;
+			padding: 10px;
+			font-size: 130%;
+			width: 6vw;
+		}
+		#pwm_w{
+			position: absolute;
+			top: 80vh;
+			left: 30vw;
+			background: cornsilk;
+			border: solid saddlebrown;
+			border-radius: 10px;
+			padding: 10px;
+			font-size: 130%;
+			width: 6vw;
+		}
+		canvas{
+			position: absolute;
+			background: rgba(222,222,222,0.8);
+			border-radius: 5px;
+			/*border: #8B4513 solid;*/
+		}
+		#cav_1{
+			top: 20vh;
+			left: 45vw;
+		}
+		#cav_2{
+			top: 40vh;
+			left: 45vw;
+		}
+		#cav_3{
+			top: 60vh;
+			left: 45vw;
+		}
+		#points_box{
+			position: absolute;
+			top: 80vh;
+			left: 55vw;
+			color: white;
+		}
+		#points{
+		}
+	</style>
+	<body>
+		<div id="main">
+			<div id="title">
+				<h1>PWM参数设置工具</h1>
+			</div>
+			<ul id="ul_a">
+				<li>
+					<div id="sys_clk">
+						<h3>系统时钟</h3>
+					</div>
+				</li>
+				<li>
+					<div id="sys_clk" style="margin-top: 12vh;">
+						<h3>PSC</h3>
+					</div>
+				</li>
+				<li style="margin-top: 8vh;" >
+					<div id="sys_clk" >
+						<h3>ARR</h3>
+					</div>
+				</li>
+				<li style="margin-top: 1vh;" >
+					<div id="sys_clk">
+						<h3>CRRx</h3>
+					</div>
+				</li>
+			</ul>
+			<div id="zkb">
+				<h3>占空比=CRRx/(ARR+1)</h3>
+			</div>
+			
+			<ul id="ul_b">
+				<li>
+					<input type="text" id="sys_clk" style="background: goldenrod;" value="72MHZ" disabled/>
+				</li>
+				<li>
+					<input type="number" style="margin-top: 5vh;" id="PSC" value="999"  min="1" max="10000" />
+				</li>
+				<li >
+					<input type="number"style="margin-top: 4vh;"  id="arr" value="999"  min="1" max="10000" />
+				</li>
+				<li style="margin-top: 1vh;">
+					<input type="number" id="crrx" value="999"  min="1" max="10000" />
+				</li>
+			</ul>
+			<input type="text" id="pwm_w" value="30" min="1" max="100" disabled/>
+			
+			
+			<canvas id="cav_1" ></canvas>
+			<canvas id="cav_2" ></canvas>
+			<canvas id="cav_3" ></canvas>
+			<div id="points_box">
+				<h3>PSC缩放:</h3><input type="range" id="points" min="1" max="500" />
+				<h3>ARR缩放:</h3><input type="range" id="points2" min="1" max="50000" />
+			</div>
+
+			
+		</div>
+	</body>
+	<script type="text/javascript">
+		var cav_a = document.getElementById("cav_1");
+		var cav_b = document.getElementById("cav_2");
+		var cav_c = document.getElementById("cav_3");
+		
+		var vw = innerWidth*0.5;
+		var vh = innerHeight*0.15;
+
+		cav_a.width = innerWidth*0.5;
+		cav_a.height = innerHeight*0.15;
+		cav_b.width = innerWidth*0.5;
+		cav_b.height = innerHeight*0.15;
+		cav_c.width = innerWidth*0.5;
+		cav_c.height = innerHeight*0.15;
+		
+		gla = cav_a.getContext("2d");
+		glb = cav_b.getContext("2d");
+		glc = cav_c.getContext("2d");
+		
+		var sys_clk = document.getElementById("sys_clk");
+		var psc_val = document.getElementById("PSC");
+		var arr_val = document.getElementById("arr");
+		var crrx_val = document.getElementById("crrx");
+		var pwm = document.getElementById("pwm_w");
+		
+		
+		gla.strokeStyle = "red";
+		glb.strokeStyle = "red";
+		glc.strokeStyle = "red";
+		gla.lineWidth=1;
+		
+		function draw_line_a(hz,w){
+			if(w>100)w=100; else if(w<1) w=1;
+			gla.beginPath();
+			gla.moveTo(0,0);
+			if( hz>300 || hz==NaN){
+				hz=300;
+			}
+			var _w=vw/hz;
+			if(w<100){
+				for(var i=0; i<hz; i++){
+					gla.lineTo(i*_w, 5);
+					gla.lineTo(i*_w+_w*w/100, 5);
+					gla.lineTo(i*_w+_w*w/100, vh-1);
+					gla.lineTo((i+1)*_w, vh-1);
+				}
+			}else{
+				glb.lineTo(vw, 5);
+			}
+			gla.stroke();
+		}
+		function draw_line_b(hz,w){
+			if(w>100)w=100; else if(w<1) w=1;
+			glb.beginPath();
+			glb.moveTo(0,5);
+			
+			if( hz>300 || hz==NaN){
+				hz=300;
+			}
+			var _w=vw/hz;
+			if(w<100){
+				for(var i=0; i<hz; i++){
+					glb.lineTo(i*_w, 5);
+					glb.lineTo(i*_w+_w*w/100, 5);
+					glb.lineTo(i*_w+_w*w/100, vh-1);
+					glb.lineTo((i+1)*_w, vh-1);
+				}
+			}else{
+				glb.lineTo(vw, 5);
+			}
+			
+			glb.stroke();
+		}
+		function draw_line_c(hz,w){
+			if(w>100)w=100; else if(w<1) w=1;
+			
+			glc.beginPath();
+			glc.moveTo(0,0);
+			if( hz>300 || hz==NaN){
+				hz=300;
+			}
+			var _w=vw/hz;
+			if(w<100){
+				for(var i=0; i<hz; i++){
+					glc.lineTo(i*_w, 5);
+					glc.lineTo(i*_w+_w*w/100, 5);
+					glc.lineTo(i*_w+_w*w/100, vh-1);
+					glc.lineTo((i+1)*_w, vh-1);
+				}
+			}else{
+				glb.lineTo(vw, 5);
+			}
+			glc.stroke();
+		}
+		var scale = document.getElementById("points");
+		var scale2 = document.getElementById("points2");
+		var pwm_ww;
+		(function run_loop () {
+			pwm_ww=Math.round((crrx_val.value/(arr_val.value+1))*1000);
+			pwm.value=pwm_ww+"%";
+			
+			gla.clearRect(0,0,vw,vh);
+			draw_line_a(720, 50);
+			
+			glb.clearRect(0,0,vw,vh);
+			draw_line_b(7200/psc_val.value*scale.value, pwm_ww);
+			
+			glc.clearRect(0,0,vw,vh);
+			draw_line_c(7200/psc_val.value/arr_val.value*scale2.value, pwm_ww);
+			
+			setTimeout(run_loop,50);
+		})()
+		
+		
+	</script>
+</html>

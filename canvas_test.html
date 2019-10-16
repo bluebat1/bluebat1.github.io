@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>canvas Test</title>
+	</head>
+	<body>
+		<canvas id="cav" width="" height=""></canvas>
+	</body>
+	<script type="text/javascript">
+		var cav = document.getElementById("cav");
+		var gl = cav.getContext("2d");
+		
+		cav.width=innerWidth;
+		cav.height = innerHeight;
+		var vr=0;
+		gl.strokeStyle = "red";
+		gl.beginPath();
+		for (var i = 0; i < 1000; i++) {
+			vr+=0.01;
+			gl.lineTo(vr*vr,vr*vr*vr);
+		}
+		gl.stroke();
+		
+		
+	</script>
+</html>
