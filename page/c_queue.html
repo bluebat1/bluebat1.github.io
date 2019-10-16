@@ -1,25 +1,127 @@
 <!DOCTYPE html>
 <html>
-	<body>
-		<div></div>
-		<div>
-			<span style="color:red">#include</span><span style="color:#ff9800"> "stdio.h"</span>
-			
-			typedef struct{
-				int angle;
-				char speed;
-				char time1;
-				char time2;
-				char state;
-			}q_data_t;
 
-			typedef struct {
-				q_data_t data[30];
-				int head;
-				int end;
-				int num;
-				int num_max;
-			}_Q;
-		</div>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+
+		<style type="text/css">
+			/**{
+				position: absolute;
+				margin: 0px;
+				padding: 0px;
+			}*/
+			
+			body {
+				position: absolute;
+				margin: 0px;
+				padding: 0px;
+			}
+		</style>
+		<link rel="stylesheet" type="text/css" href="../style/monokai-sublime.css" />
+	</head>
+
+	<body style="width: 100vw;height: 100vh;overflow: hidden auto;position: absolute;margin: 0px;padding: 0px;background: mediumpurple;">
+			<pre style="height: 90%;">
+				<code class="c++" style="height: 100%;">
+
+//循環隊列
+
+//數據結構體
+typedef struct{
+	int angle;
+	char speed;
+	char time1;
+	char time2;
+	char state;
+}q_data_t;
+//隊列結構體
+typedef struct {
+ 	q_data_t data[30];
+ 	int head;
+ 	int end;
+ 	int num;
+ 	int num_max;
+}_Q;
+
+_Q que[8];
+//創建隊列
+_Q q_create(){
+	_Q q;
+	q.num = q.head = q.end = 0;
+	q.num_max = 30;
+	return q;
+}
+//添加元素
+int q_add(_Q *q, q_data_t *data){
+	if(q->num < q->num_max){
+		q->data[q->end].angle = data->angle;
+		q->data[q->end].speed = data->speed;
+		q->data[q->end].time1 = data->time1;
+		q->data[q->end].time2 = data->time2;
+		q->data[q->end].state = data->state;
+		
+		if(q->end < q->num_max-1){
+			q->end++;
+		}else{
+			q->end = 0;
+		}
+		q->num++;
+		
+	}else{
+	 	return 0;
+	}
+	return 1;
+}
+//取出元素
+int q_take(_Q *q, q_data_t *src){
+	if(q->num > 0){
+		if(q->head < q->num_max){
+			q->head++;
+		}else{
+			q->head = 0;
+		}
+		q->num--;
+		src->angle = q->data[q->head].angle;
+		src->speed = q->data[q->head].speed;
+		src->time1 = q->data[q->head].time1;
+		src->time2 = q->data[q->head].time2;
+		src->state = q->data[q->head].state;
+	}else{
+	 	return 0;
+	}
+	return 1;
+}
+//創建隊列集
+int mq_create(){
+	int i;
+	for(i=0; i<8; i++){
+		que[i] = q_create();
+	}
+}
+//指定隊列添加數據
+int mq_add(int m_id, q_data_t *data){
+	if(q_add(que+m_id,data)){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+//指定隊列取出數據
+int mq_take(int m_id, q_data_t *src){
+	if(q_take(que+m_id,src)){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+				</code>
+			</pre>
+
+		<script src="../js/highlight.pack.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			hljs.initHighlightingOnLoad();
+		</script>
 	</body>
+
 </html>
