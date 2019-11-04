@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0px;
+				padding: 0px;
+				position: absolute;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="cav" width="" height=""></canvas>
+	</body>
+	<script type="text/javascript">
+		window.addEventListener("DOMContentLoaded",function(){
+			var w=innerHeight,
+				h=innerHeight;
+			var dom = document.getElementById("cav");
+				dom.width=w;
+				dom.height=h;
+				dom.style.left = (	innerWidth-w)/2+"px";
+			var ctx = dom.getContext("2d");
+			
+			
+			function rect(x,y,w,h,colors){
+				ctx.fillStyle = colors;
+				ctx.fillRect(x,y,w,h);
+			}
+			
+			function line(x,y,x2,y2,colors){
+				ctx.strokeStyle = colors;
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x2,y2);
+				ctx.closePath();
+				ctx.stroke();
+			}
+			
+			function removeFormArry(arry,elt){
+				for(var i=arry.length-1;i>=0;i--){
+					if(arry[i] == elt){
+						arry.splice(i,1);
+					}
+				}
+			}
+			
+			//f() = g + h;
+			//g-> begin point to now point distance
+			//h-> now point to end point distance
+			var cols = 20,
+				rows = 20;
+			var aw = w/cols,
+				ah = h/rows;
+				
+			var beginPoint = [Math.round(Math.random()*cols),Math.round(Math.random()*rows)];
+			var endPoint = [Math.round(Math.random()*cols),Math.round(Math.random()*rows)];
+			
+			var grid = new Array(cols);
+			for(var i=0;i<grid.length;i++){
+				grid[i] = new Array(rows);
+			}
+			
+			for (var i=0; i<cols; i++) {
+				for (var j=0;j<rows;j++) {
+					grid[i][j] = Math.round(Math.random()*0.6);
+//					console.log(grid[i][j])
+				}
+			}
+			
+			function ManhattanDis(pointA,pointB){
+				return Math.abs(pointA[0]-pointB[0])+Math.abs(pointA[1]-pointB[1]);
+			}
+			
+			//
+			var openSet=[];
+			var closeSet=[];
+			
+			openSet.push(beginPoint);
+			var g,h;
+			var num=0;
+			var nowPonit=beginPoint;
+			closeSet[0] = nowPonit;
+			if(openSet.length > 0){
+				
+				while(1){
+					
+					
+					
+					for (var i = 0; i < openSet.length; i++) {
+						if(ManhattanDis(openSet[i], nowPonit) < 0){
+							nowPonit = openSet[i];
+						}
+					}
+					break;
+				}
+				
+			}
+			
+			
+			function render () {
+				ctx.clearRect(0,0,w,h);
+				for (var i=0; i<=cols; i++) {
+					line(i*(aw),0,i*(aw),h,"#000000");
+				}
+				for (var i=0;i<=rows;i++) {
+					line(0,i*(ah),w,i*(ah),"#000000");
+				}
+				//
+				for (var i=0; i<cols; i++) {
+					for (var j=0;j<rows;j++) {
+						if(grid[i][j] == 0){
+							rect(i*aw,j*ah,aw,ah,"#ffffff");
+						}else{
+							rect(i*aw,j*ah,aw,ah,"black");
+						}
+					}
+				}
+				//
+				rect(beginPoint[0]*aw,beginPoint[1]*ah,aw,ah,"green");
+				rect(endPoint[0]*aw,endPoint[1]*ah,aw,ah,"red");
+				
+			}
+				
+				requestAnimationFrame(render);
+			}
+			render();
+			
+		});
+		
+	</script>
+</html>
