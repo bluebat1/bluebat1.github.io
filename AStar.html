@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<canvas id="cav" width="" height=""></canvas>
+	</body>
+	<script type="text/javascript">
+		window.addEventListener("DOMContentLoaded",function(){
+			var w=innerHeight,
+				h=innerHeight;
+			var dom = document.getElementById("cav");
+				dom.width=w;
+				dom.height=h;
+			var ctx = dom.getContext("2d");
+			
+			
+			function rect(x,y,w,h,colors){
+				ctx.fillStyle = colors;
+				ctx.fillRect(x,y,w,h);
+			}
+			
+			function line(x,y,x2,y2,colors){
+				ctx.strokeStyle = colors;
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x2,y2);
+				ctx.closePath();
+				ctx.stroke();
+			}
+			
+			function removeFormArry(arry,elt){
+				for(var i=arry.length-1;i>=0;i--){
+					if(arry[i] == elt){
+						arry.splice(i,1);
+					}
+				}
+			}
+			
+			var cols = 10,
+				rows = 10;
+			
+			var grid = new Array(cols);
+			
+			var openSet = [];
+			var closeSet = [];
+			var start,
+				end;
+			
+			for(var i=0;i<cols;i++){
+				for(var j=0;j<rows;j++){
+					
+				}
+			}
+			
+			var aw = w/close,
+				ah = h/rows;
+			
+			function spot(i,j){
+				this.x = i;
+				this.y = j;
+				this.f = 0;
+				this.g = 0;
+				this.h = 0;
+				this.neighbors = [];
+				this.show=function(){
+					rect(this.i*aw,this.j*ah,aw,ah,"green");
+				}
+			}
+			
+			function render(){
+				ctx.clear(0,0,w,h);
+				
+			}
+			
+			
+		});
+		
+	</script>
+</html>

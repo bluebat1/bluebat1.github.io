@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				/*position: absolute;*/
+				margin: 0px;
+				padding: 0px;
+				font-family: "microsoft yahei";
+			}
+			#title{
+				position: absolute;
+				width: 100%;
+				height: 10%;
+				background: rgb(66,66,66);
+				color: rgb(255,255,255);
+				
+			}
+			#title center{
+				height: 100%;
+				align-content: center;
+				line-height: 10vh;
+			}
+			#left{
+				position: absolute;
+				width: calc(30% - 2px);
+				top: 10%;
+				height: calc(90% - 3px);
+				border: 1px solid deepskyblue;
+				background: rgb(66,66,66);
+				color: rgb(255,255,255);
+			}
+			#right{
+				position: absolute;
+				width:calc(70% - 3px);
+				top: 10%;
+				left: 30%;
+				height: calc(90% - 3px);
+				background: rgb(66,66,66);
+				color: rgb(255,255,255);
+				border: 1px solid deepskyblue;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="title"><center><h3>控制系统</h3></center></div>
+		<div id="left">
+			<!--串口设置-->
+			<table border="0" cellspacing="" cellpadding="">
+				<tr>
+					<td>
+						<span id="">串口选择</span>
+					</td>
+					<td>
+						<select id="com_select"> 
+							<option value="COM1">COM1</option> 
+							<option value="COM2">COM2</option> 
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span id="">波特率选择</span>
+					</td>
+					<td>
+						<select id="baudrate_select"> 
+							<option value="9600">9600</option> 
+							<option value="115200">115200</option> 
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						
+					</td>
+					<td>
+						<input type="button" id="set_arg" value="设置参数" />
+					</td>
+				</tr>
+			</table>
+			
+			<br />
+			
+			
+			
+			<!--选项-->
+		</div>
+		<div id="right">
+			<!--参数编辑-->
+			<div id="edit">
+				
+			</div>
+		</div>
+	</body>
+</html>
+<script type="text/javascript">
+	window.oncontextmenu=function () {
+		window.returnValue=false;
+		return false;
+	}
+	
+	
+	function scan_com(x){
+		var str = x.split(',');
+		var str2;
+		for(var i=0;i<str.length;i++){
+			str2 += '<option value="'+str[i]+'">'+str[i]+'</option>';
+		}
+		document.getElementById("com_select").innerHTML=str2;
+	}
+	scan_com( win.scan_port());
+	document.getElementById("set_arg").onclick=function(){
+		console.log(document.getElementById("baudrate_select").value);
+		
+	}
+	
+</script>
