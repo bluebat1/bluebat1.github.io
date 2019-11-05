@@ -5,6 +5,7 @@
 		<title>BabylonGame1</title>
 		<script src="js/babylon.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/cannon.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/babylonjs.materials.min.js" type="text/javascript" charset="utf-8"></script>
 	</head>
 	<body>
 		<style type="text/css">
@@ -62,11 +63,33 @@
 		    sphere.checkCollisions = true;
 		    sphere.applyGravity = true;
 		    sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.9 }, scene);
+		    
+		    // Water material
+		    var waterMaterial = new BABYLON.WaterMaterial("waterMaterial", scene, new BABYLON.Vector2(512, 512));
+		    waterMaterial.bumpTexture = new BABYLON.Texture("img/texture/waterbump.png", scene);
+		    waterMaterial.windForce = -10;
+		    waterMaterial.waveHeight = 0.05;
+		    waterMaterial.bumpHeight = 0.1;
+		    waterMaterial.waveLength = 0.1;
+		    waterMaterial.waveSpeed = 50.0;
+		    waterMaterial.colorBlendFactor = 0;
+		    waterMaterial.windDirection = new BABYLON.Vector2(1, 1);
+		    waterMaterial.colorBlendFactor = 0;
+		    
+		    // Water mesh
+		    var waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 120, 120, 32, scene, false);
+		    waterMesh.material = waterMaterial;
+		    
 		    // Create a built-in "ground" shape; its constructor takes 6 params : name, width, height, subdivision, scene, updatable
-		    var ground = BABYLON.Mesh.CreateGround('ground1', 6, 6, 2, scene, false);
+		    var ground = BABYLON.Mesh.CreateGround('ground1', 1000, 1000, 32, scene, false);
 		    ground.material = new  BABYLON.StandardMaterial("texture1", scene);
-		    ground.material.diffuseTexture = new BABYLON.Texture("img/20129917170910515279.jpg", scene);ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, scene);
+			
+		    ground.material.diffuseTexture = new BABYLON.Texture("img/20129917170910519344.jpg", scene);
+			ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, scene);
 		    ground.checkCollisions = true;
+		    
+		    
+		    
 		    
 		    var ffBox = new BABYLON.Mesh.CreateBox("box", 200.0, scene, true, BABYLON.Mesh.DOUBLESIDE);
 		    ffBox.material = new  BABYLON.StandardMaterial("texture2", scene);
@@ -78,6 +101,8 @@
 		    objs.ffBox = ffBox;
 		    objs.camera = camera;
 		    
+		    waterMaterial.addToRenderList(ground);
+		    waterMaterial.addToRenderList(ffBox);
 		    console.log(objs.camera)
 		    // Return the created scene
 		    return scene;
