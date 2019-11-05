@@ -1,0 +1,379 @@
+<script type="text/javascript" src="js/three.r78.js"></script>
+<script type="text/javascript"  src="js/bas.min.1.1.2.js"></script>
+<script type="text/javascript" src="js/GPUComputationRenderer.js"></script>
+<script type="text/javascript" src="js/SimplexNoise.js"></script>
+<div id="three-container"></div>
+
+<script id="heightMapFragmentShader" type="x-shader/x-fragment">
+  #include <common>
+
+  uniform vec2 mousePos;
+  uniform float mouseSize;
+  uniform float viscosityConstant;
+
+  #define deltaTime (1.0 / 60.0)
+  #define GRAVITY_CONSTANT (resolution.x * deltaTime * 3.0)
+
+  const vec2 ONE = vec2(1.0);
+
+  void main()	{
+    vec2 cellSize = 1.0 / resolution.xy;
+    vec2 uv = gl_FragCoord.xy * cellSize;
+
+    // heightmapValue.x == height
+    // heightmapValue.y == velocity
+    // heightmapValue.z, heightmapValue.w not used
+    vec4 heightMapValue = texture2D( heightMap, uv );
+
+    // Get neighbours
+    vec4 north = texture2D(heightMap, mod(uv + vec2(0.0, cellSize.y), ONE));
+    vec4 south = texture2D(heightMap, mod(uv + vec2(0.0, -cellSize.y), ONE));
+    vec4 east = texture2D(heightMap, uv + vec2(cellSize.x, 0.0));
+    vec4 west = texture2D(heightMap, uv + vec2(-cellSize.x, 0.0));
+
+    float sump = north.x + south.x + east.x + west.x - 4.0 * heightMapValue.x;
+    float accel = sump * GRAVITY_CONSTANT;
+
+    // Dynamics
+    heightMapValue.y += accel;
+    heightMapValue.x += heightMapValue.y * deltaTime;
+
+    // Viscosity
+    heightMapValue.x += sump * viscosityConstant;
+
+    // Mouse influence
+    float mousePhase = clamp(length((uv - vec2(0.5)) * BOUNDS - vec2(mousePos.x, -mousePos.y)) * PI / mouseSize, 0.0, PI);
+    heightMapValue.x += cos(mousePhase) + 1.0;
+
+    gl_FragColor = heightMapValue;
+  }
+</script>
+<!-- <script src="/libs/threejs/r78/three.min.js"></script> -->
+<!-- <script src="/libs/bas.min.1.1.2.js"></script> -->
+<script src="js/OrbitControls-r78.js"></script>
+<script>
+
+	function THREERoot(params) {
+	  // defaults
+	  params = Object.assign({
+	    container:'#three-container',
+	    fov:60,
+	    zNear:1,
+	    zFar:10000,
+	    createCameraControls: true,
+	    autoStart: true,
+	    pixelRatio: window.devicePixelRatio,
+	    antialias: (window.devicePixelRatio === 1),
+	    alpha: false
+	  }, params);
+
+	  // maps and arrays
+	  this.updateCallbacks = [];
+	  this.resizeCallbacks = [];
+	  this.objects = {};
+
+	  // renderer
+	  this.renderer = new THREE.WebGLRenderer({
+	    antialias: params.antialias,
+	    alpha: params.alpha
+	  });
+	  this.renderer.setPixelRatio(params.pixelRatio);
+
+	  // container
+	  this.container = (typeof params.container === 'string') ? document.querySelector(params.container) : params.container;
+	  this.container.appendChild(this.renderer.domElement);
+
+	  // camera
+	  this.camera = new THREE.PerspectiveCamera(
+	    params.fov,
+	    window.innerWidth / window.innerHeight,
+	    params.zNear,
+	    params.zFar
+	  );
+
+	  // scene
+	  this.scene = new THREE.Scene();
+
+	  // resize handling
+	  this.resize = this.resize.bind(this);
+	  this.resize();
+	  window.addEventListener('resize', this.resize, false);
+
+	  // tick / update / render
+	  this.tick = this.tick.bind(this);
+	  params.autoStart && this.tick();
+
+	  // optional camera controls
+	  params.createCameraControls && this.createOrbitControls();
+	}
+THREERoot.prototype = {
+  createOrbitControls: function() {
+    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.addUpdateCallback(this.controls.update.bind(this.controls));
+  },
+  start: function() {
+    this.tick();
+  },
+  addUpdateCallback: function(callback) {
+    this.updateCallbacks.push(callback);
+  },
+  addResizeCallback: function(callback) {
+    this.resizeCallbacks.push(callback);
+  },
+  add: function(object, key) {
+    key && (this.objects[key] = object);
+    this.scene.add(object);
+  },
+  addTo: function(object, parentKey, key) {
+    key && (this.objects[key] = object);
+    this.get(parentKey).add(object);
+  },
+  get: function(key) {
+    return this.objects[key];
+  },
+  remove: function(o) {
+    var object;
+
+    if (typeof o === 'string') {
+      object = this.objects[o];
+    }
+    else {
+      object = o;
+    }
+
+    if (object) {
+      object.parent.remove(object);
+      delete this.objects[o];
+    }
+  },
+  tick: function() {
+    this.update();
+    this.render();
+    requestAnimationFrame(this.tick);
+  },
+  update: function() {
+    this.updateCallbacks.forEach(function(callback) {callback()});
+  },
+  render: function() {
+    this.renderer.render(this.scene, this.camera);
+  },
+  resize: function() {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(width, height);
+    this.resizeCallbacks.forEach(function(callback) {callback()});
+  },
+  initPostProcessing:function(passes) {
+    var size = this.renderer.getSize();
+    var pixelRatio = this.renderer.getPixelRatio();
+    size.width *= pixelRatio;
+    size.height *= pixelRatio;
+
+    var composer = this.composer = new THREE.EffectComposer(this.renderer, new THREE.WebGLRenderTarget(size.width, size.height, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat,
+      stencilBuffer: false
+    }));
+
+    var renderPass = new THREE.RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+
+    for (var i = 0; i < passes.length; i++) {
+      var pass = passes[i];
+      pass.renderToScreen = (i === passes.length - 1);
+      this.composer.addPass(pass);
+    }
+
+    this.renderer.autoClear = false;
+    this.render = function() {
+      this.renderer.clear();
+      this.composer.render();
+    }.bind(this);
+
+    this.addResizeCallback(function() {
+      var width = window.innerWidth;
+      var height = window.innerHeight;
+
+      composer.setSize(width * pixelRatio, height * pixelRatio);
+    }.bind(this));
+  }
+};
+</script>
+
+<script>
+window.onload=function(){
+
+    var planeWidth = 256;
+    var planeDepth = 512;
+
+    // setup root
+    var root = new THREERoot();
+    root.renderer.setClearColor(0xf1f1f1);
+    root.camera.position.set(200, 200, 0);
+
+    // add top light
+    var light = new THREE.DirectionalLight(0xffffff);
+    light.position.set(0, 1, 0);
+    root.add(light);
+
+    // add weaker bottom light
+    light = new THREE.DirectionalLight(0xffffff, 0.25);
+    light.position.set(0, -1, 0);
+    root.add(light);
+
+    // setup water mesh & material
+    var ctSizeX = planeWidth; // compute texture size
+    var ctSizeY = planeDepth; // compute texture size
+
+    var geometry = new THREE.PlaneBufferGeometry(planeWidth, planeDepth, ctSizeX - 1, ctSizeY - 1);
+    var material = new THREE.BAS.StandardAnimationMaterial({
+        transparent: true,
+        side: THREE.DoubleSide,
+        uniforms: {
+            uCellSize: {
+                value: new THREE.Vector2(1.0 / ctSizeX, 1.0 / ctSizeY)
+            },
+            uHeightMap: {
+                value: null
+            },
+            uFlowOffset: {
+                value: 0.0
+            }
+        },
+        uniformValues: {
+            roughness: 0.0,
+            metalness: 0.0,
+            diffuse: new THREE.Color(0x0099FF), //0xD5E5F1, 0x4B83C3
+            opacity: 0.5
+        },
+        vertexParameters: [
+            'uniform vec2 uCellSize;',
+            'uniform sampler2D uHeightMap;',
+            'uniform float uFlowOffset;'
+        ],
+        vertexNormal: [
+            'vec2 tUv = uv;',
+            'tUv.y = mod(uv.y + uFlowOffset, 1.0);',
+
+            'objectNormal = vec3(',
+            '(texture2D(uHeightMap, tUv + vec2(-uCellSize.x, 0)).x - texture2D(uHeightMap, tUv + vec2(uCellSize.x, 0)).x),',
+            '(texture2D(uHeightMap, tUv + vec2(0, -uCellSize.y)).x - texture2D(uHeightMap, tUv + vec2(0, uCellSize.y)).x),',
+            '1.0);'
+        ],
+        vertexPosition: [
+            'transformed.z = texture2D(uHeightMap, tUv).x;'
+        ]
+    });
+
+    var waterMesh = new THREE.Mesh(geometry, material);
+    waterMesh.rotation.x = -Math.PI / 2;
+    root.scene.add(waterMesh);
+
+    // add a mesh for simpler mouse interaction
+    var mouseMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(planeWidth, planeDepth), new THREE.MeshBasicMaterial({
+        visible: false
+    }));
+    mouseMesh.rotation.x = waterMesh.rotation.x;
+    root.scene.add(mouseMesh);
+
+    // setup the GPU computation renderer and height map texture
+    var computationRenderer = new GPUComputationRenderer(ctSizeX, ctSizeY, root.renderer);
+    var heightMap = computationRenderer.createTexture();
+
+    function fillTexture(texture) {
+        var simplex = new SimplexNoise();
+        var waterMaxHeight = 4.0;
+
+        function noise(x, y, z) {
+            var multR = waterMaxHeight;
+            var mult = 0.05;
+            var r = 0;
+            for (var i = 0; i < 15; i++) {
+                r += multR * simplex.noise3d(x * mult, y * mult, z * mult);
+                multR *= 0.53 + 0.025 * i;
+                mult *= 1.25;
+            }
+            return r;
+        }
+
+        var pixels = texture.image.data;
+        var p = 0;
+        var waveFactorX = 0.5;
+        var waveFactorY = 0.75;
+
+        for (var j = 0; j < ctSizeY; j++) {
+            for (var i = 0; i < ctSizeX; i++) {
+                var x = i * waveFactorX;
+                var y = j * waveFactorY;
+
+                pixels[p] = (noise(x, y, 0));
+                pixels[p + 1] = Math.random() * 2 - 1; // velocity?
+                pixels[p + 2] = 0; // not used
+                pixels[p + 3] = 1; // not used
+                p += 4;
+            }
+        }
+    }
+
+    fillTexture(heightMap);
+
+    var heightMapFragmentShader = document.getElementById('heightMapFragmentShader').textContent;
+    var heightMapVariable = computationRenderer.addVariable('heightMap', heightMapFragmentShader, heightMap);
+
+    computationRenderer.setVariableDependencies(heightMapVariable, [heightMapVariable]);
+
+    heightMapVariable.material.uniforms.mousePos = {
+        value: new THREE.Vector2(0, 0)
+    };
+    heightMapVariable.material.uniforms.mouseSize = {
+        value: 12.0
+    };
+    heightMapVariable.material.uniforms.viscosityConstant = {
+        value: 0.08
+    };
+    heightMapVariable.material.defines.BOUNDS = 'vec2(' + planeWidth.toFixed(1) + ',' + planeDepth.toFixed(1) + ')';
+
+    computationRenderer.init();
+
+    // setup mouse interactivity
+    var mouseNDC = new THREE.Vector2();
+    var raycaster = new THREE.Raycaster();
+
+    document.addEventListener('mousemove', function(e) {
+        mouseNDC.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    }, false);
+
+    root.addUpdateCallback(function() {
+        material.uniforms.uFlowOffset.value += (1 / 240);
+        material.uniforms.uFlowOffset.value %= 1;
+
+        raycaster.setFromCamera(mouseNDC, root.camera);
+
+        var intersects = raycaster.intersectObject(mouseMesh);
+
+        if (intersects.length > 0) {
+            var point = intersects[0].point;
+            var x = point.x;
+            var z = point.z;
+            // correct z coordinate for UV offset
+            z = THREE.Math.mapLinear(z, planeDepth * 0.5, -planeDepth * 0.5, 0, 1);
+            z += material.uniforms.uFlowOffset.value;
+            z %= 1.0;
+            z = THREE.Math.mapLinear(z, 0.0, 1.0, planeDepth * 0.5, -planeDepth * 0.5);
+
+            heightMapVariable.material.uniforms.mousePos.value.set(x, z);
+        }
+
+        computationRenderer.compute();
+
+        material.uniforms.uHeightMap.value = computationRenderer.getCurrentRenderTarget(heightMapVariable).texture;
+    })
+}
+</script>
+<!-- <script src="/uploads/161101/GPUComputationRenderer.js"></script>
+<script src="/uploads/161101/SimplexNoise.js"></script> -->
