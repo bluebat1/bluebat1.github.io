@@ -128,6 +128,7 @@ window.onload = function() {
 		    // Create a basic light, aiming 0, 1, 0 - meaning, to the sky
 		    var l_HemisphericLight = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
 		    var l_PointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(1, 10, -10), scene);
+		    var l_PointLight2 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(1, 1, -10), scene);
 		    // Create a built-in "sphere" shape; its constructor takes 6 params: name, segment, diameter, scene, updatable, sideOrientation
 //		    var sphere = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene, false, BABYLON.Mesh.FRONTSIDE);
 //		    // Move the sphere upward 1/2 of its height
@@ -182,6 +183,7 @@ window.onload = function() {
 					meshes[i].scaling = new BABYLON.Vector3(0.005, 0.005, 0.005);
 					meshes[i].position = new BABYLON.Vector3(0.0, -2.0, 0.0);
 					waterMaterial.addToRenderList(meshes[i]);
+					meshes[i].checkCollisions = true;
 				}
 			    // Adds all elements to the scene
 			    container.addAllToScene();
