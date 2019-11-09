@@ -99,7 +99,7 @@ window.onload = function() {
 		    scene = new BABYLON.Scene(engine);
 		    // Create a FreeCamera, and set its position to {x: 0, y: 5, z: -10}
 		    //VirtualJoysticksCamera UniversalCamera
-		    camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 5, -10), scene);
+		    camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 10, -30), scene);
 		    // Target the camera to scene origin
 		    camera.setTarget(BABYLON.Vector3.Zero());
 		    // Attach the camera to the canvas
@@ -174,14 +174,14 @@ window.onload = function() {
 		    ffBox.rotation.y = Math.PI;
 		    
 		    
-		    BABYLON.SceneLoader.LoadAssetContainer("./model/", "XiaoQiao.babylon", scene, function (container) {
+		    BABYLON.SceneLoader.LoadAssetContainer("./model/", "Hua.babylon", scene, function (container) {
 			    var meshes = container.meshes;
 			    var materials = container.materials;
 			    //...
 			    console.log(container);
 				for (var i = 0; i < meshes.length; i++) {
-					meshes[i].scaling = new BABYLON.Vector3(0.005, 0.005, 0.005);
-					meshes[i].position = new BABYLON.Vector3(0.0, -2.0, 0.0);
+//					meshes[i].scaling = new BABYLON.Vector3(0.005, 0.005, 0.005);
+//					meshes[i].position = new BABYLON.Vector3(0.0, -2.0, 0.0);
 					waterMaterial.addToRenderList(meshes[i]);
 					meshes[i].checkCollisions = true;
 				}
